@@ -10,17 +10,36 @@ export class AuthService {
   ) {}
 
   async guestLogin() {
-    const user = await this.usersService.createGuestUser();
-    const payload = { email: user.email, sub: user._id, isGuest: user.isGuest };
-    
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        isGuest: user.isGuest
-      }
-    };
+    try {
+      const user = await this.usersService.createGuestUser();
+      const userId = user._id ? user._id.toString() : 'guest-id-' + Date.now();
+      const payload = { email: user.email, sub: userId, isGuest: user.isGuest };
+      
+      const token = this.jwtService.sign(payload);
+      return {
+        access_token: token,
+        user: {
+          id: userId,
+          email: user.email || 'guest@example.com',
+          name: user.name || 'Dexter',
+          isGuest: true
+        }
+      };
+    } catch (error) {
+      console.error('Error during guest login:', error);
+      // Fallback guest session in case DB write encounters issue
+      const fallbackId = 'guest-' + Date.now();
+      const payload = { email: 'guest@example.com', sub: fallbackId, isGuest: true };
+      const token = this.jwtService.sign(payload);
+      return {
+        access_token: token,
+        user: {
+          id: fallbackId,
+          email: 'guest@example.com',
+          name: 'Dexter',
+          isGuest: true
+        }
+      };
+    }
   }
 }

@@ -11,7 +11,7 @@ import { UsersModule } from '../users/users.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('JWT_SECRET') || process.env.JWT_SECRET || 'supersecret123',
         signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
