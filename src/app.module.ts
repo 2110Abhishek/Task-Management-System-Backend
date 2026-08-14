@@ -15,7 +15,11 @@ import { AuthModule } from './modules/auth/auth.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
+        uri: configService.get<string>('MONGO_URI') || 
+             configService.get<string>('MONGODB_URI') || 
+             process.env.MONGO_URI || 
+             process.env.MONGODB_URI || 
+             'mongodb://127.0.0.1:27017/task-management',
       }),
       inject: [ConfigService],
     }),
